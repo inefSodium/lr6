@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расписание занятий - Панель администратора</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link href="https://bootswatch.com/5/minty/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #6d09d8 0%, #2575fc 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .schedule-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-family: Arial, sans-serif;
+        }
+        
+        th, td {
+            border: 2px solid #dee2e6;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        th {
+            background-color: #6f42c1;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Все ячейки таблицы изначально одинаковые */
+        td {
+            background-color: #f8f9fa;
+            color: #495057;
+            vertical-align: middle;
+        }
+        
+        /* Эффект при наведении на ячейку */
+        td:hover {
+            background-color: #e9ecef;
+            transform: scale(1.02);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            z-index: 1;
+            position: relative;
+        }
+        
+        /* Особый стиль для первой колонки (номера пар) */
+        tbody td:first-child {
+            background-color: #20c997;
+            color: white;
+            text-align: right;
+            font-weight: bold;
+            width: 100px;
+        }
+        
+        /* Эффект при наведении на первую колонку */
+        tbody td:first-child:hover {
+            background-color: #1ba87e;
+            transform: scale(1.02);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .form-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .form-section:last-child {
+            border-bottom: none;
+        }
+        
+        .table-responsive {
+            overflow: visible;
+        }
+        
+        /* Стили для объединенных ячеек */
+        .merged-cell {
+            background-color: #e3f2fd;
+            font-weight: 500;
+        }
+        
+        .merged-cell:hover {
+            background-color: #bbdefb;
+        }
+        
+        /* Стили для выбранной ячейки */
+        .selected-cell {
+            background-color: #fff3cd !important;
+            border: 2px solid #ffc107 !important;
+        }
+        
+        /* Стили для пустых ячеек */
+        .empty-cell {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5"><i class="bi bi-calendar-week"></i> Расписание занятий</h1>
+                    <p class="lead">Панель администратора для управления расписанием</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="schedule-container">
+            <h3 class="mb-4 text-primary"><i class="bi bi-table"></i> ИУ6-33Б</h3>
+            <p class="text-muted mb-3">Расписание с автоматическим объединением ячеек</p>
+            <div class="table-responsive">
+                <table id="scheduleTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">Время</th>
+                            <th>Понедельник</th>
+                            <th>Вторник</th>
+                            <th>Среда</th>
+                            <th>Четверг</th>
+                            <th>Пятница</th>
+                            <th>Суббота</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1 пара</td>
+                            <td class="empty-cell" data-day="Понедельник" data-lesson="1"></td>
+                            <td class="empty-cell" data-day="Вторник" data-lesson="1"></td>
+                            <td data-day="Среда" data-lesson="1">Физика</td>
+                            <td data-day="Четверг" data-lesson="1">Теория вероятностей и математическая статистика</td>
+                            <td class="empty-cell" data-day="Пятница" data-lesson="1"></td>
+                            <td class="empty-cell" data-day="Суббота" data-lesson="1"></td>
+                        </tr>
+                        <tr>
+                            <td>2 пара</td>
+                            <td data-day="Понедельник" data-lesson="2">Материалы приборных конструкций</td>
+                            <td class="empty-cell" data-day="Вторник" data-lesson="2"></td>
+                            <td data-day="Среда" data-lesson="2">Электротехника</td>
+                            <td data-day="Четверг" data-lesson="2">Теория вероятностей и математическая статистика</td>
+                            <td class="empty-cell" data-day="Пятница" data-lesson="2"></td>
+                            <td class="empty-cell" data-day="Суббота" data-lesson="2"></td>
+                        </tr>
+                        <tr>
+                            <td>3 пара</td>
+                            <td data-day="Понедельник" data-lesson="3">Теория вероятностей и математическая статистика</td>
+                            <td class="empty-cell" data-day="Вторник" data-lesson="3"></td>
+                            <td data-day="Среда" data-lesson="3">Элективный курс по физической культуре и спорту</td>
+                            <td data-day="Четверг" data-lesson="3">Элективный курс по физической культуре и спорту</td>
+                            <td class="empty-cell" data-day="Пятница" data-lesson="3"></td>
+                            <td class="empty-cell" data-day="Суббота" data-lesson="3">Языки интернет-программирования</td>
+                        </tr>
+                        <tr>
+                            <td>4 пара</td>
+                            <td data-day="Понедельник" data-lesson="4">Правоведение</td>
+                            <td class="empty-cell" data-day="Вторник" data-lesson="4"></td>
+                            <td class="empty-cell" data-day="Среда" data-lesson="4"></td>
+                            <td class="empty-cell" data-day="Четверг" data-lesson="4"></td>
+                            <td data-day="Пятница" data-lesson="4">Элективный курс по физической культуре и спорту</td>
+                            <td class="empty-cell" data-day="Суббота" data-lesson="4">Языки интернет-программирования</td>
+                        </tr>
+                        <tr>
+                            <td>5 пара</td>
+                            <td class="empty-cell" data-day="Понедельник" data-lesson="5"></td>
+                            <td data-day="Вторник" data-lesson="5">Материалы приборных конструкций</td>
+                            <td class="empty-cell" data-day="Среда" data-lesson="5"></td>
+                            <td class="empty-cell" data-day="Четверг" data-lesson="5"></td>
+                            <td data-day="Пятница" data-lesson="5">Электротехника</td>
+                            <td class="empty-cell" data-day="Суббота" data-lesson="5"></td>
+                        </tr>
+                        <tr>
+                            <td>6 пара</td>
+                            <td class="empty-cell" data-day="Понедельник" data-lesson="6"></td>
+                            <td data-day="Вторник" data-lesson="6">Материалы приборных конструкций</td>
+                            <td class="empty-cell" data-day="Среда" data-lesson="6"></td>
+                            <td class="empty-cell" data-day="Четверг" data-lesson="6"></td>
+                            <td data-day="Пятница" data-lesson="6">Теория вероятностей и математическая статистика</td>
+                            <td class="empty-cell" data-day="Суббота" data-lesson="6"></td>
+                        </tr>
+                        <tr>
+                            <td>7 пара</td>
+                            <td class="empty-cell" data-day="Понедельник" data-lesson="7"></td>
+                            <td class="empty-cell" data-day="Вторник" data-lesson="7"></td>
+                            <td class="empty-cell" data-day="Среда" data-lesson="7"></td>
+                            <td class="empty-cell" data-day="Четверг" data-lesson="7"></td>
+                            <td data-day="Пятница" data-lesson="7">Иностранный язык</td>
+                            <td class="empty-cell" data-day="Суббота" data-lesson="7"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <h3 class="mb-4 text-primary"><i class="bi bi-pencil-square"></i> Форма изменения расписания</h3>
+            
+            <form id="scheduleForm">
+                <div class="form-section">
+                    <div class="mb-3">
+                        <label for="subjectName" class="form-label fw-bold">Название предмета:</label>
+                        <input type="text" class="form-control" id="subjectName" placeholder="Введите название предмета">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <label class="form-label fw-bold">День недели:</label>
+                    <div class="d-flex flex-wrap gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="weekday" id="monday" value="Понедельник">
+                            <label class="form-check-label" for="monday">Понедельник</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="weekday" id="tuesday" value="Вторник">
+                            <label class="form-check-label" for="tuesday">Вторник</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="weekday" id="wednesday" value="Среда">
+                            <label class="form-check-label" for="wednesday">Среда</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="weekday" id="thursday" value="Четверг">
+                            <label class="form-check-label" for="thursday">Четверг</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="weekday" id="friday" value="Пятница">
+                            <label class="form-check-label" for="friday">Пятница</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="weekday" id="saturday" value="Суббота">
+                            <label class="form-check-label" for="saturday">Суббота</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <label class="form-label fw-bold">Пара:</label>
+                    <div class="d-flex flex-wrap gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="lesson" id="lesson1" value="1">
+                            <label class="form-check-label" for="lesson1">1 пара</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="lesson" id="lesson2" value="2">
+                            <label class="form-check-label" for="lesson2">2 пара</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="lesson" id="lesson3" value="3">
+                            <label class="form-check-label" for="lesson3">3 пара</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="lesson" id="lesson4" value="4">
+                            <label class="form-check-label" for="lesson4">4 пара</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="lesson" id="lesson5" value="5">
+                            <label class="form-check-label" for="lesson5">5 пара</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="lesson" id="lesson6" value="6">
+                            <label class="form-check-label" for="lesson6">6 пара</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="lesson" id="lesson7" value="7">
+                            <label class="form-check-label" for="lesson7">7 пара</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                    <button type="button" class="btn btn-outline-secondary me-md-2" id="resetBtn">
+                        <i class="bi bi-arrow-clockwise"></i> Сбросить
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveBtn">
+                        <i class="bi bi-check-circle"></i> Сохранить изменения
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p class="mb-0">Расписание занятий &copy; 2025 | Все права защищены</p>
+        </div>
+    </div>
+
+    <!-- Подключение Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const scheduleTable = document.getElementById('scheduleTable');
+            const subjectNameInput = document.getElementById('subjectName');
+            const weekdayRadios = document.querySelectorAll('input[name="weekday"]');
+            const lessonRadios = document.querySelectorAll('input[name="lesson"]');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            
+            let selectedCell = null;
+            // Снимок исходного состояния содержимого ячеек (до изменений)
+            const initialContentByCell = new Map();
+            document.querySelectorAll('td[data-day][data-lesson]').forEach(cell => {
+                const key = `${cell.getAttribute('data-day')}__${cell.getAttribute('data-lesson')}`;
+                initialContentByCell.set(key, cell.textContent.trim());
+            });
+            
+            // Обработчик клика по ячейке таблицы
+            scheduleTable.addEventListener('click', function(e) {
+                const cell = e.target.closest('td');
+                if (!cell || cell.cellIndex === 0) return; // Игнорируем первую колонку с номерами пар
+                
+                // Снимаем выделение с предыдущей ячейки
+                if (selectedCell) {
+                    selectedCell.classList.remove('selected-cell');
+                }
+                
+                // Выделяем новую ячейку
+                cell.classList.add('selected-cell');
+                selectedCell = cell;
+                
+                // Заполняем форму данными из ячейки
+                const day = cell.getAttribute('data-day');
+                const lesson = cell.getAttribute('data-lesson');
+                const subject = cell.textContent.trim();
+                
+                subjectNameInput.value = subject;
+                
+                // Устанавливаем соответствующие радиокнопки
+                weekdayRadios.forEach(radio => {
+                    if (radio.value === day) {
+                        radio.checked = true;
+                    }
+                });
+                
+                lessonRadios.forEach(radio => {
+                    if (radio.value === lesson) {
+                        radio.checked = true;
+                    }
+                });
+            });
+            
+            // Обработчик сохранения изменений
+            saveBtn.addEventListener('click', function() {
+                if (!selectedCell) {
+                    alert('Пожалуйста, выберите ячейку для изменения.');
+                    return;
+                }
+                
+                const subject = subjectNameInput.value.trim();
+                
+                // Обновляем содержимое ячейки
+                selectedCell.textContent = subject;
+                
+                // Убираем класс empty-cell, если ячейка теперь заполнена
+                if (subject) {
+                    selectedCell.classList.remove('empty-cell');
+                } else {
+                    selectedCell.classList.add('empty-cell');
+                }
+                
+                // Автоматически объединяем ячейки с одинаковыми предметами
+                autoMergeCells();
+                
+                alert('Изменения сохранены! Ячейки автоматически объединены.');
+            });
+            
+            // Обработчик сброса формы и расписания к исходному состоянию
+            resetBtn.addEventListener('click', function() {
+                // Сбрасываем значения формы
+                subjectNameInput.value = '';
+                
+                // Сбрасываем радиокнопки
+                weekdayRadios.forEach(radio => radio.checked = false);
+                lessonRadios.forEach(radio => radio.checked = false);
+                
+                // Восстанавливаем исходное содержимое всех ячеек
+                const allCells = scheduleTable.querySelectorAll('td[data-day][data-lesson]');
+                allCells.forEach(cell => {
+                    const key = `${cell.getAttribute('data-day')}__${cell.getAttribute('data-lesson')}`;
+                    const originalText = initialContentByCell.get(key) || '';
+                    cell.textContent = originalText;
+                    if (originalText) {
+                        cell.classList.remove('empty-cell');
+                    } else {
+                        cell.classList.add('empty-cell');
+                    }
+                });
+                
+                // Снимаем выделение
+                if (selectedCell) {
+                    selectedCell.classList.remove('selected-cell');
+                    selectedCell = null;
+                }
+                
+                // Сбрасываем объединения и повторно применяем автообъединение
+                resetAllMerges();
+                autoMergeCells();
+            });
+            
+            // Функция для автоматического объединения ячеек
+            function autoMergeCells() {
+                // Сначала сбрасываем все объединения
+                resetAllMerges();
+                
+                const rows = scheduleTable.querySelectorAll('tbody tr');
+                const days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+                
+                // Объединение по вертикали (rowspan)
+                days.forEach(day => {
+                    for (let lesson = 1; lesson <= 7; lesson++) {
+                        mergeVerticalCells(day, lesson, rows);
+                    }
+                });
+                
+                // Объединение по горизонтали (colspan)
+                for (let lesson = 1; lesson <= 7; lesson++) {
+                    mergeHorizontalCells(lesson, rows);
+                }
+            }
+            
+            // Функция для сброса всех объединений
+            function resetAllMerges() {
+                const allCells = scheduleTable.querySelectorAll('td');
+                allCells.forEach(cell => {
+                    cell.removeAttribute('rowspan');
+                    cell.removeAttribute('colspan');
+                    cell.classList.remove('merged-cell');
+                    cell.style.display = '';
+                    
+                    // Восстанавливаем содержимое ячеек, которые были скрыты из-за объединений
+                    const day = cell.getAttribute('data-day');
+                    const lesson = cell.getAttribute('data-lesson');
+                    if (day && lesson) {
+                        // Если ячейка пустая, добавляем класс empty-cell
+                        if (!cell.textContent.trim()) {
+                            cell.classList.add('empty-cell');
+                        } else {
+                            cell.classList.remove('empty-cell');
+                        }
+                    }
+                });
+            }
+            
+            // Функция для объединения ячеек по вертикали
+            function mergeVerticalCells(day, lesson, rows) {
+                const startCell = findCell(day, lesson, rows);
+                if (!startCell || !startCell.textContent.trim() || startCell.hasAttribute('rowspan')) return;
+                
+                const subject = startCell.textContent.trim();
+                let rowspan = 1;
+                
+                // Проверяем ячейки ниже
+                for (let nextLesson = lesson + 1; nextLesson <= 7; nextLesson++) {
+                    const nextCell = findCell(day, nextLesson, rows);
+                    if (nextCell && 
+                        nextCell.textContent.trim() === subject && 
+                        !nextCell.hasAttribute('rowspan') && 
+                        !nextCell.hasAttribute('colspan')) {
+                        rowspan++;
+                    } else {
+                        break;
+                    }
+                }
+                
+                if (rowspan > 1) {
+                    startCell.setAttribute('rowspan', rowspan);
+                    startCell.classList.add('merged-cell');
+                    
+                    // Помечаем ячейки, которые будут объединены, как скрытые
+                    for (let i = 1; i < rowspan; i++) {
+                        const cellToHide = findCell(day, lesson + i, rows);
+                        if (cellToHide) {
+                            cellToHide.style.display = 'none';
+                        }
+                    }
+                }
+            }
+            
+            // Функция для объединения ячеек по горизонтали
+            function mergeHorizontalCells(lesson, rows) {
+                const days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+                
+                for (let i = 0; i < days.length; i++) {
+                    const currentCell = findCell(days[i], lesson, rows);
+                    if (!currentCell || !currentCell.textContent.trim() || 
+                        currentCell.hasAttribute('colspan') || currentCell.style.display === 'none') continue;
+                    
+                    const currentSubject = currentCell.textContent.trim();
+                    let colspan = 1;
+                    
+                    // Проверяем ячейки справа
+                    for (let j = i + 1; j < days.length; j++) {
+                        const nextCell = findCell(days[j], lesson, rows);
+                        if (nextCell && 
+                            nextCell.textContent.trim() === currentSubject && 
+                            !nextCell.hasAttribute('colspan') && 
+                            nextCell.style.display !== 'none') {
+                            colspan++;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    if (colspan > 1) {
+                        currentCell.setAttribute('colspan', colspan);
+                        currentCell.classList.add('merged-cell');
+                        
+                        // Помечаем ячейки, которые будут объединены, как скрытые
+                        for (let j = i + 1; j < i + colspan; j++) {
+                            const cellToHide = findCell(days[j], lesson, rows);
+                            if (cellToHide) {
+                                cellToHide.style.display = 'none';
+                            }
+                        }
+                        
+                        i += colspan - 1; // Пропускаем объединенные ячейки
+                    }
+                }
+            }
+            
+            // Функция для поиска ячейки по дню и паре
+            function findCell(day, lesson, rows) {
+                for (const row of rows) {
+                    const cells = row.querySelectorAll('td');
+                    for (const cell of cells) {
+                        if (cell.getAttribute('data-day') === day && 
+                            cell.getAttribute('data-lesson') === lesson.toString() &&
+                            cell.style.display !== 'none') {
+                            return cell;
+                        }
+                    }
+                }
+                return null;
+            }
+            
+            // Автоматическое заполнение формы при выборе радиокнопок
+            function autoSelectCell() {
+                const selectedDay = document.querySelector('input[name="weekday"]:checked');
+                const selectedLesson = document.querySelector('input[name="lesson"]:checked');
+                
+                if (!selectedDay || !selectedLesson) return;
+                
+                // Снимаем выделение с предыдущей ячейки
+                if (selectedCell) {
+                    selectedCell.classList.remove('selected-cell');
+                }
+                
+                // Ищем ячейку с соответствующими атрибутами
+                const targetCell = document.querySelector(`td[data-day="${selectedDay.value}"][data-lesson="${selectedLesson.value}"]`);
+                
+                if (targetCell && targetCell.style.display !== 'none') {
+                    targetCell.classList.add('selected-cell');
+                    selectedCell = targetCell;
+                    
+                    // Заполняем форму данными из ячейки
+                    const subject = targetCell.textContent.trim();
+                    subjectNameInput.value = subject;
+                }
+            }
+            
+            // Добавляем обработчики для радиокнопок
+            weekdayRadios.forEach(radio => {
+                radio.addEventListener('change', autoSelectCell);
+            });
+            
+            lessonRadios.forEach(radio => {
+                radio.addEventListener('change', autoSelectCell);
+            });
+            
+            // Инициализируем автоматическое объединение при загрузке
+            autoMergeCells();
+        });
+    </script>
+</body>
+</html>
